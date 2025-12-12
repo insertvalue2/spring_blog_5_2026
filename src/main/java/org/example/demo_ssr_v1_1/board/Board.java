@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.demo_ssr_v1_1._core.errors.exception.Exception400;
 import org.example.demo_ssr_v1_1.user.User;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -54,7 +55,7 @@ public class Board {
     // 개별 필드 수정 - title
     public void updateTitle(String newTitle) {
         if(newTitle == null || newTitle.trim().isEmpty()) {
-            throw new IllegalArgumentException("제목은 필수 입니다");
+            throw new Exception400("제목은 필수 입니다");
         }
         this.title = newTitle;
     }
@@ -62,7 +63,7 @@ public class Board {
     // 개별 필드 수정 - content
     public void updateContent(String newContent) {
         if(newContent == null || newContent.trim().isEmpty()) {
-            throw new IllegalArgumentException("내용은 필수 입니다");
+            throw new Exception400("내용은 필수 입니다");
         }
         this.content = content;
     }

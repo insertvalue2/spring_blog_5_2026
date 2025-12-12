@@ -1,6 +1,7 @@
 package org.example.demo_ssr_v1_1.user;
 
 import lombok.Data;
+import org.example.demo_ssr_v1_1._core.errors.exception.Exception400;
 
 public class UserRequest {
 
@@ -11,10 +12,10 @@ public class UserRequest {
 
         public void validate() {
             if(username == null  || username.trim().isEmpty()) {
-                throw new IllegalArgumentException("사용자명을 입력해주세요");
+                throw new Exception400("사용자명을 입력해주세요");
             }
             if(password == null || password.trim().isEmpty()) {
-                throw new IllegalArgumentException("비밀번호를 입력해주세요");
+                throw new Exception400("비밀번호를 입력해주세요");
             }
         }
 
@@ -28,16 +29,16 @@ public class UserRequest {
         
         public void validate() {
             if(username == null  || username.trim().isEmpty()) {
-                throw new IllegalArgumentException("사용자명을 입력해주세요");
+                throw new Exception400("사용자명을 입력해주세요");
             }
             if(password == null || password.trim().isEmpty()) {
-                throw new IllegalArgumentException("비밀번호를 입력해주세요");
+                throw new Exception400("비밀번호를 입력해주세요");
             }
             if(email == null || email.trim().isEmpty()) {
-                throw new IllegalArgumentException("이메일을 입력해주세요");
+                throw new Exception400("이메일을 입력해주세요");
             }
             if(email.contains("@") == false) {
-                throw new IllegalArgumentException("올바른 이메일 형식이 아닙니다");
+                throw new Exception400("올바른 이메일 형식이 아닙니다");
             }
         }
 
@@ -59,10 +60,10 @@ public class UserRequest {
 
         public void validate() {
             if(password == null || password.trim().isEmpty()) {
-                throw new IllegalArgumentException("비밀번호를 입력해주세요");
+                throw new Exception400("비밀번호를 입력해주세요");
             }
             if(password.length() < 4) {
-                throw new IllegalArgumentException("비밀번호는 4글자 이상이어야 합니다");
+                throw new Exception400("비밀번호는 4글자 이상이어야 합니다");
             }
         }
     }

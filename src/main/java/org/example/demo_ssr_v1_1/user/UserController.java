@@ -3,8 +3,9 @@ package org.example.demo_ssr_v1_1.user;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.example.demo_ssr_v1_1._core.errors.exception.Exception401;
+import org.example.demo_ssr_v1_1._core.errors.exception.Exception400;
 import org.example.demo_ssr_v1_1._core.errors.exception.Exception403;
+import org.example.demo_ssr_v1_1._core.errors.exception.Exception404;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,18 +25,14 @@ public class UserController {
         // A 사용자가 요청 시 --> 웹서버 --> 톰캣(WAS) Reuqest객체와 Response 객체를 만들어서
         // 스프링 컨테이너에게 전달해줌
 
-        // 1. 인증 검사 (o)
-        // 인증 검사를 하려면 세션 메모리에 접근해서 사용자의 정보가 있는 없는지 여부 확인
+        // 1. 인증 검사: LoginInterceptor가 처리 (인터셉터를 통과했다는 것은 로그인된 사용자임)
         User sessionUser = (User)session.getAttribute("sessionUser");
-        if(sessionUser == null) {
-            throw new Exception401("로그인 먼저 해주세요");
-        }
 
         // 2. 인가 검사 (o)
         // 세션의 사용자 ID로 회원정보 조회
         User user = userRepository.findById(sessionUser.getId());
         if(user == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다");
+            throw new Exception404("사용자를 찾을 수 없습니다");
         }
         
         // 자기 자신의 정보만 수정 가능한지 확인
@@ -52,17 +49,14 @@ public class UserController {
     // http://localhost:8080/user/update
     @PostMapping("/user/update")
     public String updateProc(UserRequest.UpdateDTO updateDTO, HttpSession session) {
-        // 1. 인증 검사 (o)
-        User sessionUser =  (User) session.getAttribute("sessionUser");
-        if(sessionUser == null) {
-            throw new Exception401("로그인 먼저 해주세요");
-        }
+        // 1. 인증 검사: LoginInterceptor가 처리 (인터셉터를 통과했다는 것은 로그인된 사용자임)
+        User sessionUser = (User) session.getAttribute("sessionUser");
 
         // 2. 인가 검사 (o)
         // 수정하려는 회원정보 조회
         User user = userRepository.findById(sessionUser.getId());
         if(user == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다");
+            throw new Exception404("사용자를 찾을 수 없습니다");
         }
         
         // 자기 자신의 정보만 수정 가능한지 확인
@@ -120,7 +114,7 @@ public class UserController {
                     loginDTO.getPassword());
 
             if(sessionUser == null) {
-                throw new IllegalArgumentException("사용자명 또는 비밀번호가 올바르지 않습니다");
+                throw new Exception400("사용자명 또는 비밀번호가 올바르지 않습니다");
             }
             // 세션에 저장
             session.setAttribute("sessionUser", sessionUser);
@@ -153,7 +147,7 @@ public class UserController {
         joinDTO.validate();
         User existingUser = userRepository.findByusername(joinDTO.getUsername());
         if(existingUser != null) {
-            throw new IllegalArgumentException("이미 존재하는 사용자 이름입니다");
+            throw new Exception400("이미 존재하는 사용자 이름입니다");
         }
         User user = joinDTO.toEntity();
         userRepository.save(user);

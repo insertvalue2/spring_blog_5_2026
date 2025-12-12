@@ -3,6 +3,7 @@ package org.example.demo_ssr_v1_1.user;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import lombok.RequiredArgsConstructor;
+import org.example.demo_ssr_v1_1._core.errors.exception.Exception404;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +26,7 @@ public class UserRepository {
     public User findById(Long id) {
         User user = em.find(User.class, id);
         if(user == null) {
-            throw new RuntimeException("사용자를 찾을 수 없습니다");
+            throw new Exception404("사용자를 찾을 수 없습니다");
         }
         return user;
     }

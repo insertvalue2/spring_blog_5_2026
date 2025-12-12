@@ -29,14 +29,10 @@ public class BoardController {
     @GetMapping("/board/{id}/update")
     public String updateForm(@PathVariable Long id,Model model, HttpSession session) {
 
-       // 1. 인증 검사 (0)
-       User sessionUser = (User)session.getAttribute("sessionUser"); // sessionUser -> 상수
-       if(sessionUser == null) {
-           System.out.println("로그인 안한 사용자의 요청이 들어 옴");
-           return "redirect:/login";
-       } 
+       // 1. 인증 검사: LoginInterceptor가 처리 (인터셉터를 통과했다는 것은 로그인된 사용자임)
+       User sessionUser = (User)session.getAttribute("sessionUser");
 
-       // 2. 인가 검사 (0)
+       // 2. 인가 검사 (o)
        Board board = repository.findById(id);
        if(board == null) {
             throw new Exception500("게시글이 삭제 되었습니다");
@@ -61,13 +57,15 @@ public class BoardController {
     public String updateProc(@PathVariable Long id,
                              BoardRequest.UpdateDTO updateDTO, HttpSession session) {
 
-        // 1. 인증 처리 (o)
-        User sessionUser =  (User)session.getAttribute("sessionUser");
-        if(sessionUser == null) {
-            throw new Exception401("로그인 먼저 해주세요");
-        }
+        // 1. 인증 검사: LoginInterceptor가 처리 (인터셉터를 통과했다는 것은 로그인된 사용자임)
+        User sessionUser = (User)session.getAttribute("sessionUser");
 
+        // 2. 인가 검사 (o)
         Board board = repository.findById(id);
+        if(board == null) {
+            throw new Exception404("게시글을 찾을 수 없습니다");
+        }
+        
         if(board.isOwner(sessionUser.getId()) == false) {
             throw new Exception403("게시글 수정 권한이 없습니다");
         }
@@ -76,7 +74,7 @@ public class BoardController {
             repository.updateById(id, updateDTO);
             // 더티 체킹 활용
         } catch (Exception e) {
-            throw new RuntimeException("게시글 수정 실패");
+            throw new Exception500("게시글 수정 실패: " + e.getMessage());
         }
         return "redirect:/board/list";
     }
@@ -101,10 +99,7 @@ public class BoardController {
      */
     @GetMapping("/board/save")
     public String saveFrom(HttpSession session) {
-        User sessionUser = (User) session.getAttribute("sessionUser");
-        if(sessionUser == null) {
-            throw new Exception401("로그인 먼저 해주세요");
-        }
+        // 인증 검사: LoginInterceptor가 처리 (인터셉터를 통과했다는 것은 로그인된 사용자임)
         return "board/save-form";
     }
 
@@ -116,11 +111,8 @@ public class BoardController {
      */
     @PostMapping("/board/save")
     public String saveProc(BoardRequest.SaveDTO saveDTO, HttpSession session) {
-        // 1. 인증 처리 확인
+        // 인증 검사: LoginInterceptor가 처리 (인터셉터를 통과했다는 것은 로그인된 사용자임)
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if(sessionUser == null) {
-            throw new Exception401("로그인 먼저 해주세요");
-        }
 
         Board board = saveDTO.toEntity(sessionUser);
         repository.save(board);
@@ -135,16 +127,17 @@ public class BoardController {
      */
     @PostMapping("/board/{id}/delete")
     public String delete(@PathVariable Long id, HttpSession session) {
-        // 1. 인증 처리 (o)
-        // 1. 인증 처리 확인
+        // 1. 인증 검사: LoginInterceptor가 처리 (인터셉터를 통과했다는 것은 로그인된 사용자임)
         User sessionUser = (User) session.getAttribute("sessionUser");
-        if(sessionUser == null) {
-            throw new Exception401("로그인 먼저 해주세요");
-        }
-        // 2. 인가 처리 (o) || 관리자 권한
+        
+        // 2. 인가 검사 (o)
         Board board = repository.findById(id);
+        if(board == null) {
+            throw new Exception404("게시글을 찾을 수 없습니다");
+        }
+        
         if(board.isOwner(sessionUser.getId()) == false) {
-            throw new Exception401("삭제 권한이 없습니다");
+            throw new Exception403("삭제 권한이 없습니다");
         }
 
         repository.deleteById(id);

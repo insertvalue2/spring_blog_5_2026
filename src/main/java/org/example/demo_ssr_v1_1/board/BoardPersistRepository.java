@@ -3,6 +3,7 @@ package org.example.demo_ssr_v1_1.board;
 
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import org.example.demo_ssr_v1_1._core.errors.exception.Exception404;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -43,7 +44,7 @@ public class BoardPersistRepository {
     public Board updateById(Long id, BoardRequest.UpdateDTO reqDTO) {
         Board board = entityManager.find(Board.class, id);
         if(board == null) {
-            throw new IllegalArgumentException("수정할 게시글을 찾을 수 없어요");
+            throw new Exception404("수정할 게시글을 찾을 수 없습니다");
         }
         board.update(reqDTO);
 //        board.setTitle(req.getTitle());
@@ -63,7 +64,7 @@ public class BoardPersistRepository {
     public void deleteById(Long id) {
         Board board = entityManager.find(Board.class, id);
         if(board == null) {
-            throw new IllegalArgumentException("삭제할 게시글이 없어요");
+            throw new Exception404("삭제할 게시글을 찾을 수 없습니다");
         }
         entityManager.remove(board);
     }
